@@ -1,0 +1,60 @@
+apply plugin: 'maven'
+
+def RELEASE_REPOSITORY_URL = 'http://localhost:8081/repository/Release/'
+def SNAPSHOT_REPOSITORY_URL = 'http://localhost:8081/repository/Snapshot/'
+
+def ACCOUNT = 'admin'
+def PASSWORD = 'admin123'
+
+// cn.qk365.training:train:1.0.0
+def ARTIFACT_ID = 'train'
+def VERSION_NAME = android.getDefaultConfig().versionName
+def GROUP_ID = 'cn.qk365.training'
+
+def isSnapshotBuild = VERSION_NAME.contains("SNAPSHOT")
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    failOnError = false
+    options.encoding = "UTF-8"
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            snapshotRepository(url: SNAPSHOT_REPOSITORY_URL) {
+                authentication(userName: ACCOUNT, password: PASSWORD)
+            }
+            repository(url: RELEASE_REPOSITORY_URL) {
+                authentication(userName: ACCOUNT, password: PASSWORD)
+            }
+            pom.project {
+                groupId GROUP_ID
+                artifactId ARTIFACT_ID
+                version VERSION_NAME
+                packaging 'aar'
+            }
+
+            println 'Group Id：' + GROUP_ID
+            println 'Artifact：' + ARTIFACT_ID
+            println 'Version：' + VERSION_NAME
+            println 'Maven Repository：' + isSnapshotBuild ? SNAPSHOT_REPOSITORY_URL : RELEASE_REPOSITORY_URL
+        }
+    }
+}
