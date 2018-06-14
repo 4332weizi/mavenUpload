@@ -5,21 +5,23 @@
 
 以上传名为`library`的module为例：
 
- 1.将mavenUpload.gradle到工程根目录  
- 2.将gradle.properties放到`library`中，并配置信息  
+ 1.在local.properties中添加下列配置信息:  
 ```
-MAVEN_REPO_RELEASE=http://localhost:8081/repository/Release/
-MAVEN_REPO_SNAPSHOT=http://localhost:8081/repository/Snapshot/
+# maven repository url
+repo.url.release = http://localhost:8081/repository/maven-releases/
+repo.url.snapshot = http://localhost:8081/repository/maven-snapshots/
 
-MAVEN_REPO_USERNAME=admin
-MAVEN_REPO_PASSWORD=admin123
+# username and password
+repo.user.name = admin
+repo.user.password = admin123
 
-MAVEN_REPO_GROUP=io.auxo.library
-MAVEN_REPO_ARTIFACT=library
-MAVEN_REPO_VERSION=1.0
+# group:artifact:version
+repo.group = io.auxo.library
+repo.artifact = library
+repo.version = 1.0
 ```
- 3.在`library`的build.gradle中加入  
+ 2.在`library`的build.gradle中加入  
 ```
-apply from: "../mavenUpload.gradle"
+apply from: 'https://raw.githubusercontent.com/4332weizi/mavenUpload/master/mavenUpload.gradle'
 ```
- 4.执行`gradlew clean :library:uploadArchives`  
+ 3.执行`gradlew clean :library:uploadArchives`  

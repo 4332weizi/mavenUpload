@@ -1,6 +1,23 @@
 apply plugin: 'maven'
 
-def isSnapshotBuild = MAVEN_REPO_VERSION.contains("SNAPSHOT")
+// local.properties
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+// maven repository url
+def repo_url_release = properties.getProperty("repo.url.release")
+def repo_url_snapshot = properties.getProperty("repo.url.snapshot")
+
+// username and password
+def repo_user_name = properties.getProperty("repo.user.name")
+def repo_user_password = properties.getProperty("repo.user.password")
+
+// group:artifact:version
+def repo_group =  properties.getProperty("repo.group")
+def repo_artifact =  properties.getProperty("repo.artifact")
+def repo_version =  properties.getProperty("repo.version")
+
+def isSnapshotBuild = repo_version.contains("SNAPSHOT")
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -29,23 +46,23 @@ artifacts {
 uploadArchives {
     repositories {
         mavenDeployer {
-            snapshotRepository(url: MAVEN_REPO_SNAPSHOT) {
-                authentication(userName: MAVEN_REPO_USERNAME, password: MAVEN_REPO_PASSWORD)
+            snapshotRepository(url: repo_url_snapshot) {
+                authentication(userName: repo_user_name, password: repo_user_password)
             }
-            repository(url: MAVEN_REPO_RELEASE) {
-                authentication(userName: MAVEN_REPO_USERNAME, password: MAVEN_REPO_PASSWORD)
+            repository(url: repo_url_release) {
+                authentication(userName: repo_user_name, password: repo_user_password)
             }
             pom.project {
-                groupId MAVEN_REPO_GROUP
-                artifactId MAVEN_REPO_ARTIFACT
-                version MAVEN_REPO_VERSION
+                groupId repo_group
+                artifactId repo_artifact
+                version repo_version
                 packaging 'aar'
             }
 
-            println 'Group Id：' + MAVEN_REPO_GROUP
-            println 'Artifact：' + MAVEN_REPO_ARTIFACT
-            println 'Version：' + MAVEN_REPO_VERSION
-            println 'Maven Repository：' + (isSnapshotBuild ? MAVEN_REPO_SNAPSHOT : MAVEN_REPO_RELEASE)
+            println 'Group Id：' + repo_group
+            println 'Artifact：' + repo_artifact
+            println 'Version：' + repo_version
+            println 'Maven Repository：' + (isSnapshotBuild ? repo_url_snapshot : repo_url_release)
         }
     }
 }
